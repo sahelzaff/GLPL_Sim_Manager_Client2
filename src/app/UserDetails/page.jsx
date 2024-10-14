@@ -20,45 +20,46 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
     setDisplayUser(initialUser);
   }, [initialUser]);
 
-  if (!user) return <div>No user selected</div>;
-
   const handleEditClick = useCallback(() => {
     setEditModalOpen(true);
   }, []);
   
-  const handle90Click = () => {
+  const handle90Click = useCallback(() => {
     setIsModalOpen(true);
-  };
-  const handle90clickclose = () => {
+  }, []);
+
+  const handle90clickclose = useCallback(() => {
     setIsModalOpen(false);
-  };
+  }, []);
 
-  const handle100Click = () => {
+  const handle100Click = useCallback(() => {
     setAIsModalOpen(true);
-  };
-  const handle100clickclose = () => {
-    setAIsModalOpen(false);
-  };
+  }, []);
 
-  const handleOverClick = () => {
+  const handle100clickclose = useCallback(() => {
+    setAIsModalOpen(false);
+  }, []);
+
+  const handleOverClick = useCallback(() => {
     setOverIsModalOpen(true);
-  };
-  const handleOverclickclose = () => {
+  }, []);
+
+  const handleOverclickclose = useCallback(() => {
     setOverIsModalOpen(false);
-  };
+  }, []);
 
   const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
     setUpdatedUser(prev => ({ ...prev, [name]: value }));
   }, []);
 
-  const handleEmailInputChange = (e) => {
+  const handleEmailInputChange = useCallback((e) => {
     const { name, value } = e.target;
     setDisplayUser((prevUser) => ({
       ...prevUser,
-      [name]: value, // Update the specific field based on input name
+      [name]: value,
     }));
-  };
+  }, []);
   
   const handleUpdateClick = useCallback(async () => {
     try {
@@ -75,7 +76,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
     }
   }, [updatedUser, user.Sr_no, onUpdateUser]);
 
-  const handleEmailSubmit = async (emailType) => {
+  const handleEmailSubmit = useCallback(async (emailType) => {
     // Capture the current values from the displayUser state
     const { Current_User_Name, Cell_no, DataUsage, Current_User_Email } = displayUser;
 
@@ -144,13 +145,15 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
       // Show an error toast, but with a more user-friendly message
       toast.error('There was an issue composing the email, but it may have been created in Outlook. Please check your drafts.');
     }
-  };
+  }, [displayUser]);
 
   // Helper function to format and split previous users
-  const formatPreviousUsers = (previousUsers) => {
+  const formatPreviousUsers = useCallback((previousUsers) => {
     if (!previousUsers) return ['None'];
     return previousUsers.split('/').map((name) => name.trim());
-  };
+  }, []);
+
+  if (!user) return <div>No user selected</div>;
 
   return (
     <div>
@@ -448,6 +451,16 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
                   type="email"
                   name="Current_User_Email"
                   value={updatedUser.Current_User_Email}
+                  onChange={handleInputChange}
+                  className="border p-2 w-full"
+                />
+              </div>
+              <div>
+                <label><strong>Sim No:</strong></label>
+                <input
+                  type="text"
+                  name="SIM_No"
+                  value={updatedUser.SIM_No}
                   onChange={handleInputChange}
                   className="border p-2 w-full"
                 />
