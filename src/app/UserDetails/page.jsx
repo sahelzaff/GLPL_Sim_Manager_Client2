@@ -15,9 +15,11 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
   const [isOverModalOpen, setOverIsModalOpen] = useState(false);
 
   useEffect(() => {
-    setUser(initialUser);
-    setUpdatedUser(initialUser);
-    setDisplayUser(initialUser);
+    if (initialUser) {
+      setUser(initialUser);
+      setUpdatedUser(initialUser);
+      setDisplayUser(initialUser);
+    }
   }, [initialUser]);
 
   const handleEditClick = useCallback(() => {
@@ -62,6 +64,12 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
   }, []);
   
   const handleUpdateClick = useCallback(async () => {
+    if (!user || !user.Sr_no) {
+      console.error('User or Sr_no is undefined');
+      toast.error('Error updating user: Invalid user data');
+      return;
+    }
+
     try {
       const response = await axios.put(`http://localhost:5000/api/users/${user.Sr_no}`, updatedUser);
       if (response.status === 200) {
@@ -74,7 +82,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
       console.error('Error updating user:', error);
       toast.error('Error updating user');
     }
-  }, [updatedUser, user.Sr_no, onUpdateUser]);
+  }, [updatedUser, user, onUpdateUser]);
 
   const handleEmailSubmit = useCallback(async (emailType) => {
     // Capture the current values from the displayUser state
