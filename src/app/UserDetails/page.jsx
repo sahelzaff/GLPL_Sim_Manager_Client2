@@ -1,36 +1,30 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import EmailModal from './email';
 
-
-const UserDetails = ({ user, onGoBack, onUpdateUser }) => {
+const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
   const [isEditModalOpen, setEditModalOpen] = useState(false);
-  const [updatedUser, setUpdatedUser] = useState(user);
-  const [displayUser, setDisplayUser] = useState(user);
+  const [user, setUser] = useState(initialUser);
+  const [updatedUser, setUpdatedUser] = useState(initialUser);
+  const [displayUser, setDisplayUser] = useState(initialUser);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAModalOpen, setAIsModalOpen] = useState(false);
   const [isOverModalOpen, setOverIsModalOpen] = useState(false);
 
-  // const openModal = () => {
-  //   setIsModalOpen(true);
-  // };
-
-  // const closeModal = () => {
-  //   setIsModalOpen(false);
-  // };
-
   useEffect(() => {
-    setUpdatedUser(user);
-    setDisplayUser(user);
-  }, [user]);
+    setUser(initialUser);
+    setUpdatedUser(initialUser);
+    setDisplayUser(initialUser);
+  }, [initialUser]);
 
   if (!user) return <div>No user selected</div>;
 
-  // Open the modal when Edit button is clicked
-  const handleEditClick = () => {
+  const handleEditClick = useCallback(() => {
     setEditModalOpen(true);
-  };
+  }, []);
   
   const handle90Click = () => {
     setIsModalOpen(true);
@@ -39,14 +33,12 @@ const UserDetails = ({ user, onGoBack, onUpdateUser }) => {
     setIsModalOpen(false);
   };
 
-
   const handle100Click = () => {
     setAIsModalOpen(true);
   };
   const handle100clickclose = () => {
     setAIsModalOpen(false);
   };
-
 
   const handleOverClick = () => {
     setOverIsModalOpen(true);
@@ -55,11 +47,10 @@ const UserDetails = ({ user, onGoBack, onUpdateUser }) => {
     setOverIsModalOpen(false);
   };
 
-  // Handle input changes in the modal form
-  const handleInputChange = (e) => {
+  const handleInputChange = useCallback((e) => {
     const { name, value } = e.target;
-    setUpdatedUser({ ...updatedUser, [name]: value });
-  };
+    setUpdatedUser(prev => ({ ...prev, [name]: value }));
+  }, []);
 
   const handleEmailInputChange = (e) => {
     const { name, value } = e.target;
@@ -69,124 +60,89 @@ const UserDetails = ({ user, onGoBack, onUpdateUser }) => {
     }));
   };
   
-
-  // Handle update click to send the updated data to the backend
-  const handleUpdateClick = async () => {
-    if (!user.Sr_no) {
-      console.error('User Sr_no is undefined');
-      return;
-    }
-
+  const handleUpdateClick = useCallback(async () => {
     try {
-      // Send the updated user data to the backend API
       const response = await axios.put(`http://localhost:5000/api/users/${user.Sr_no}`, updatedUser);
-
-      // Check if the response is successful
       if (response.status === 200) {
-        // Close the modal
         setEditModalOpen(false);
-
-        // Fetch the updated user details from the backend
-        const updatedResponse = await axios.get(`http://localhost:5000/api/users/${user.Sr_no}`);
-        onUpdateUser(updatedResponse.data); // Trigger the update user function with fresh data
-      } else {
-        console.error('Failed to update user:', response.data);
+        setUser(response.data);
+        onUpdateUser(response.data);
+        toast.success('User updated successfully');
       }
     } catch (error) {
-      console.error('Error updating user:', error.response ? error.response.data : error.message);
+      console.error('Error updating user:', error);
+      toast.error('Error updating user');
     }
-  };
+  }, [updatedUser, user.Sr_no, onUpdateUser]);
 
-  const handleEmailSubmit = async () => {
+  const handleEmailSubmit = async (emailType) => {
     // Capture the current values from the displayUser state
     const { Current_User_Name, Cell_no, DataUsage, Current_User_Email } = displayUser;
 
-    // Construct the subject and body based on the template
-    const subject = `90% Data Usage Alert For +91 ${Cell_no}`;
-    const body = `Dear ${Current_User_Name},\n\n` +
-      `I hope this message finds you well.\n` +
-      `This is to inform you that you have used 90% of your allocated data quota for your Vi number +91 ${Cell_no}. Your remaining data balance is ${DataUsage} GB. Please be advised that any data usage beyond your plan limit will incur additional charges of ₹40 per GB.\n` +
-      `We kindly request you to monitor and reduce your data usage to avoid these additional charges.\n\n` +
-      `Thank you for your attention to this matter.`;
-
-    try {
-      // Construct the request URL with query parameters
-      const requestUrl = `http://localhost:5000/api/email/90?to=${encodeURIComponent(Current_User_Email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-      // Make the GET request to the API
-      const response = await axios.get(requestUrl);
-
-      if (response.status === 200) {
-        // Success, close the modal or show a success message
-        setIsModalOpen(false); // Assuming `setIsModalOpen` is the state function to close the modal
-        console.log('Email sent successfully:', response.data);
-      } else {
-        console.error('Failed to send email:', response.data);
-      }
-    } catch (error) {
-      console.error('Error sending email:', error.response ? error.response.data : error.message);
+    // Construct the subject and body based on the email type
+    let subject, body;
+    switch (emailType) {
+      case '90':
+        subject = `90% Data Usage Alert For +91 ${Cell_no}`;
+        body = `Dear ${Current_User_Name},\n\n` +
+          `I hope this message finds you well.\n` +
+          `This is to inform you that you have used 90% of your allocated data quota for your Vi number +91 ${Cell_no}. Your remaining data balance is ${DataUsage} GB. Please be advised that any data usage beyond your plan limit will incur additional charges of ₹40 per GB.\n` +
+          `We kindly request you to monitor and reduce your data usage to avoid these additional charges.\n\n` +
+          `Thank you for your attention to this matter.`;
+        break;
+      case '100':
+        subject = `100% Data Usage Alert For +91 ${Cell_no}`;
+        body = `Dear ${Current_User_Name},\n\n` +
+          `I hope this message finds you well.\n` +
+          `This is to inform you that you have used 100% of your allocated data quota for your Vi number +91 ${Cell_no}. Your remaining data balance is ${DataUsage} GB. Please be advised that any data usage beyond your plan limit will incur additional charges of ₹40 per GB.\n` +
+          `We kindly request you to monitor and reduce your data usage to avoid these additional charges.\n\n` +
+          `Thank you for your attention to this matter.`;
+        break;
+      case 'over':
+        subject = `Data Limit Exceeded Additional Charges Applied For +91 ${Cell_no}`;
+        body = `Dear ${Current_User_Name},\n\n` +
+          `I hope this message finds you well.\n\n` +
+          `This is to inform you that you have fully utilised your allocated data quota for your Vi number +91 ${Cell_no}. As a result, you are now browsing at standard rates and have consumed ${DataUsage} GB of data beyond your plan.\n` +
+          `Please be aware that continuing to use data at this rate will incur additional charges. We recommend reducing your data usage to avoid further costs.\n` +
+          `If you have any questions or need assistance, please don't hesitate to reach out.\n` +
+          `We kindly request you to monitor and reduce your data usage to avoid these additional charges.\n\n` +
+          `Thank you for your attention to this matter.`;
+        break;
+      default:
+        toast.error('Invalid email type');
+        return;
     }
-  };
-  const handleAEmailSubmit = async () => {
-    // Capture the current values from the displayUser state
-    const { Current_User_Name, Cell_no, DataUsage, Current_User_Email } = displayUser;
-
-    // Construct the subject and body based on the template
-    const subject = `100% Data Usage Alert For +91 ${Cell_no}`;
-    const body = `Dear ${Current_User_Name},\n\n` +
-      `I hope this message finds you well.\n` +
-      `This is to inform you that you have used 100% of your allocated data quota for your Vi number +91 ${Cell_no}. Your remaining data balance is ${DataUsage} GB. Please be advised that any data usage beyond your plan limit will incur additional charges of ₹40 per GB.\n` +
-      `We kindly request you to monitor and reduce your data usage to avoid these additional charges.\n\n` +
-      `Thank you for your attention to this matter.`;
 
     try {
       // Construct the request URL with query parameters
-      const requestUrl = `http://localhost:5000/api/email/100?to=${encodeURIComponent(Current_User_Email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const requestUrl = `http://localhost:5000/api/email/${emailType}?to=${encodeURIComponent(Current_User_Email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-      // Make the GET request to the API
       const response = await axios.get(requestUrl);
 
-      if (response.status === 200) {
-        // Success, close the modal or show a success message
-        setIsModalOpen(false); // Assuming `setIsModalOpen` is the state function to close the modal
-        console.log('Email sent successfully:', response.data);
+      // Close the modal regardless of the response
+      setIsModalOpen(false);
+      setAIsModalOpen(false);
+      setOverIsModalOpen(false);
+
+      if (response.data && response.data.message) {
+        // If we have a success message from the server
+        toast.success(response.data.message);
       } else {
-        console.error('Failed to send email:', response.data);
+        // If we don't have a specific message, use a generic success message
+        toast.success('Email Composed Successfully');
       }
+
+      console.log('Email composition response:', response.data);
     } catch (error) {
-      console.error('Error sending email:', error.response ? error.response.data : error.message);
-    }
-  };
-  const handleOverEmailSubmit = async () => {
-    // Capture the current values from the displayUser state
-    const { Current_User_Name, Cell_no, DataUsage, Current_User_Email } = displayUser;
+      console.error('Error composing email:', error.response ? error.response.data : error.message);
+      
+      // Close the modal even if there's an error
+      setIsModalOpen(false);
+      setAIsModalOpen(false);
+      setOverIsModalOpen(false);
 
-    // Construct the subject and body based on the template
-    const subject = `Data Limit Exceeded Additional Charges Applied For +91 ${Cell_no}`;
-    const body = `Dear ${Current_User_Name},\n\n` +
-      `I hope this message finds you well.\n\n` +
-      `This is to inform you that you have fully utilised your allocated data quota for your Vi number +91 ${Cell_no}. As a result, you are now browsing at standard rates and have consumed ${DataUsage} GB of data beyond your plan.\n` +
-      `Please be aware that continuing to use data at this rate will incur additional charges. We recommend reducing your data usage to avoid further costs.\n` +
-      `If you have any questions or need assistance, please don't hesitate to reach out.\n`+
-      `We kindly request you to monitor and reduce your data usage to avoid these additional charges.\n\n` +
-      `Thank you for your attention to this matter.`;
-
-    try {
-      // Construct the request URL with query parameters
-      const requestUrl = `http://localhost:5000/api/email/dataOveremail?to=${encodeURIComponent(Current_User_Email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-      // Make the GET request to the API
-      const response = await axios.get(requestUrl);
-
-      if (response.status === 200) {
-        // Success, close the modal or show a success message
-        setIsModalOpen(false); // Assuming `setIsModalOpen` is the state function to close the modal
-        console.log('Email sent successfully:', response.data);
-      } else {
-        console.error('Failed to send email:', response.data);
-      }
-    } catch (error) {
-      console.error('Error sending email:', error.response ? error.response.data : error.message);
+      // Show an error toast, but with a more user-friendly message
+      toast.error('There was an issue composing the email, but it may have been created in Outlook. Please check your drafts.');
     }
   };
 
@@ -321,13 +277,13 @@ const UserDetails = ({ user, onGoBack, onUpdateUser }) => {
               <div className="flex justify-end">
                 <button
                   className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-md mr-2"
-                  onClick={handle90clickclose}
+                  onClick={() => setIsModalOpen(false)}
                 >
                   Cancel
                 </button>
                 <button
                   className="px-4 py-2 bg-glpl-red hover:bg-red-800 text-white rounded-md"
-                  onClick={handleEmailSubmit}
+                  onClick={() => handleEmailSubmit('90')}
                 >
                   Send Email
                 </button>
@@ -355,7 +311,7 @@ const UserDetails = ({ user, onGoBack, onUpdateUser }) => {
                 type="text"
                 name="name"
                 value={displayUser.Current_User_Name}
-                onChange={handleEmailInputChangehandleEmailInputChange}
+                onChange={handleEmailInputChange}
                 placeholder="Name"
                 className="border border-gray-300 p-2 mb-2 w-full"
               />
@@ -363,7 +319,7 @@ const UserDetails = ({ user, onGoBack, onUpdateUser }) => {
                 type="text"
                 name="cellNo"
                 value={displayUser.Cell_no}
-                onChange={handleEmailInputChangehandleEmailInputChange}
+                onChange={handleEmailInputChange}
                 placeholder="Cell Number"
                 className="border border-gray-300 p-2 mb-2 w-full"
               />
@@ -371,7 +327,7 @@ const UserDetails = ({ user, onGoBack, onUpdateUser }) => {
                 type="text"
                 name="dataUsage"
                 value={displayUser.DataUsage}
-                onChange={handleEmailInputChangehandleEmailInputChange}
+                onChange={handleEmailInputChange}
                 placeholder="Data Usage"
                 className="border border-gray-300 p-2 mb-2 w-full"
               />
@@ -379,20 +335,20 @@ const UserDetails = ({ user, onGoBack, onUpdateUser }) => {
                 type="email"
                 name="email"
                 value={displayUser.Current_User_Email}
-                onChange={handleEmailInputChangehandleEmailInputChange}
+                onChange={handleEmailInputChange}
                 placeholder="Email"
                 className="border border-gray-300 p-2 mb-4 w-full"
               />
               <div className="flex justify-end">
                 <button
                   className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-md mr-2"
-                  onClick={handle100clickclose}
+                  onClick={() => setAIsModalOpen(false)}
                 >
                   Cancel
                 </button>
                 <button
                   className="px-4 py-2 bg-glpl-red hover:bg-red-800 text-white rounded-md"
-                  onClick={handleAEmailSubmit}
+                  onClick={() => handleEmailSubmit('100')}
                 >
                   Send Email
                 </button>
@@ -444,13 +400,13 @@ const UserDetails = ({ user, onGoBack, onUpdateUser }) => {
               <div className="flex justify-end">
                 <button
                   className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-md mr-2"
-                  onClick={handleOverclickclose}
+                  onClick={() => setOverIsModalOpen(false)}
                 >
                   Cancel
                 </button>
                 <button
                   className="px-4 py-2 bg-glpl-red hover:bg-red-800 text-white rounded-md"
-                  onClick={handleOverEmailSubmit}
+                  onClick={() => handleEmailSubmit('over')}
                 >
                   Send Email
                 </button>
@@ -532,6 +488,7 @@ const UserDetails = ({ user, onGoBack, onUpdateUser }) => {
                   <option value="Tuticurin">Tuticurin</option>
                   <option value="Rudrapur">Rudrapur</option>
                   <option value="Kolkata">Kolkata</option>
+                  <option value="Hyderabad">Hyderabad</option>
                 </select>
               </div>
               <div>
@@ -558,7 +515,7 @@ const UserDetails = ({ user, onGoBack, onUpdateUser }) => {
                   <option value="">Select a Remark</option>
                   <option value="Active">Active</option>
                   <option value="Suspended">Suspended</option>
-                  <option value="Instock">In stock</option>
+                  <option value="In Stock">In stock</option>
                   <option value="Disabled">Disabled</option>
                 </select>
               </div>
@@ -573,7 +530,7 @@ const UserDetails = ({ user, onGoBack, onUpdateUser }) => {
                   <option value="">Select a Remark</option>
                   <option value="Active">Active</option>
                   <option value="Suspended">Suspended</option>
-                  <option value="Instock">In stock</option>
+                  <option value="In Stock">In stock</option>
                   <option value="Disabled">Disabled</option>
                 </select>
               </div>
@@ -635,6 +592,7 @@ const UserDetails = ({ user, onGoBack, onUpdateUser }) => {
           </div>
         </div>
       )}
+        <ToastContainer />
     </div>
   );
 };

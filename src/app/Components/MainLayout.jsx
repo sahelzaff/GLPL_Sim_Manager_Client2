@@ -1,64 +1,68 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Home from '../Users/page';
 import UserDetails from '../UserDetails/page';
-import Navbar from './Navbar';
 import Sidebar from './Sidebar';
-import AddUser from '../Add_user.jsx'; // Import the Add_user component
+import AddUser from '../Add_user.jsx';
 
 const MainLayout = () => {
   const [selectedUser, setSelectedUser] = useState(null);
-  const [activeMenu, setActiveMenu] = useState('Home'); // State to keep track of the active menu item
-  const [isAddingUser, setIsAddingUser] = useState(false); // New state to track if AddUser component should be shown
+  const [activeMenu, setActiveMenu] = useState('Home');
+  const [isAddingUser, setIsAddingUser] = useState(false);
 
-  const handleUserClick = (user) => {
+  const handleUserClick = useCallback((user) => {
+    console.log("Selected user in MainLayout:", user);
     setSelectedUser(user);
-  };
+  }, []);
 
-  const handleUpdateUser = (updatedUser) => {
-    // Update the user in the users list or state
-    setUsers((prevUsers) =>
-      prevUsers.map((user) =>
-        user.Sr_no === updatedUser.Sr_no ? updatedUser : user
-      )
-    );
-  };
+  const handleUpdateUser = useCallback((updatedUser) => {
+    console.log("Updated user in MainLayout:", updatedUser);
+    setSelectedUser(updatedUser);
+  }, []);
 
-  const handleGoBack = () => {
+  const handleGoBack = useCallback(() => {
+    console.log("Going back to user list");
     setSelectedUser(null);
-  };
+  }, []);
 
-  const handleMenuClick = (item) => {
+  useEffect(() => {
+    console.log("Current selectedUser in MainLayout:", selectedUser);
+  }, [selectedUser]);
+
+  const handleMenuClick = useCallback((item) => {
     setActiveMenu(item);
     if (item === 'Logout') {
       // Handle logout functionality here
       console.log('Logging out...');
     }
-  };
+  }, []);
 
-  // New handler for the "Add User" button
-  const handleAddUserClick = () => {
-    setIsAddingUser(true); // Set the state to show the AddUser component
-  };
+  const handleAddUserClick = useCallback(() => {
+    setIsAddingUser(true);
+  }, []);
 
-  const handleAddUserCancel = () => {
-    setIsAddingUser(false); // Go back to the Home page
-  };
+  const handleAddUserCancel = useCallback(() => {
+    setIsAddingUser(false);
+  }, []);
+
+  console.log("Current selectedUser:", selectedUser); // Add this line for debugging
 
   return (
     <div className="flex h-screen">
-      {/* Fixed Sidebar */}
       <Sidebar activeMenu={activeMenu} onMenuClick={handleMenuClick} />
       
-      {/* Main Content Area */}
       <div className="flex-1 ml-64 flex flex-col overflow-y-auto">
         <div className="font-poppins flex-1">
           {isAddingUser ? (
-            <AddUser onCancel={handleAddUserCancel}  />  
+            <AddUser onCancel={handleAddUserCancel} />
           ) : selectedUser ? (
-            <UserDetails user={selectedUser} onGoBack={handleGoBack} onUpdateUser={handleUpdateUser} />
+            <UserDetails 
+              user={selectedUser} 
+              onGoBack={handleGoBack} 
+              onUpdateUser={handleUpdateUser} 
+            />
           ) : (
-            <Home onUserClick={handleUserClick} onAddUserClick={handleAddUserClick} />  
+            <Home onUserClick={handleUserClick} onAddUserClick={handleAddUserClick} />
           )}
         </div>
       </div>

@@ -1,5 +1,24 @@
 export const isAuthenticated = async () => {
-  // Here you check for the token or session data in cookies or localStorage
-  const token = localStorage.getItem('authToken'); // Or from cookies
-  return !!token; // If token exists, return true; otherwise, return false
+  try {
+    const token = localStorage.getItem('authToken');
+    if (!token) return false;
+
+    const response = await fetch('http://localhost:5000/api/verify-token', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.message === 'Token is valid';
+    }
+
+    return false;
+  } catch (error) {
+    console.error('Token verification failed:', error);
+    return false;
+  }
 };
