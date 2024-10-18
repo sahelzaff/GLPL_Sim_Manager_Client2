@@ -13,6 +13,15 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAModalOpen, setAIsModalOpen] = useState(false);
   const [isOverModalOpen, setOverIsModalOpen] = useState(false);
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [approvalEmailData, setApprovalEmailData] = useState({
+    month: '',
+    name: '',
+    reporting_manager: '',
+    planname: '',
+    base: '',
+    isd_minutes: ''
+  });
 
   useEffect(() => {
     if (initialUser) {
@@ -161,6 +170,48 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
     return previousUsers.split('/').map((name) => name.trim());
   }, []);
 
+  const handleApprovalEmailInputChange = (e) => {
+    const { name, value } = e.target;
+    setApprovalEmailData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleApprovalEmailSubmit = async () => {
+    const subject = `Approval Request for Vodafone Mobile Bills ${approvalEmailData.month} ${user.Current_User_Name}`;
+    const body = `Dear ${user.Reporting_Manager},
+
+Please find attached the Vodafone mobile bills ${approvalEmailData.month} for ${user.Current_User_Name}. The details are as follows:
+• ${user.Current_User_Name}:
+   Plan - ${user.PlanName}
+   Base - ${user.Cost}
+   ISD ${approvalEmailData.isd_minutes || 'N/A'} mins - 
+
+Kindly review and approve the bills at your earliest convenience.`;
+
+    try {
+      console.log('Sending approval email with data:', { to: user.Manager_Email, subject, body });
+      const response = await axios.get(`http://localhost:5000/api/email/approval`, {
+        params: {
+          to: user.Manager_Email,
+          subject,
+          body
+        }
+      });
+
+      console.log('Approval email response:', response.data);
+
+      if (response.data && response.data.message) {
+        toast.success(response.data.message);
+      } else {
+        toast.success('Approval Email Composed Successfully');
+      }
+
+      setIsApprovalModalOpen(false);
+    } catch (error) {
+      console.error('Error composing approval email:', error.response ? error.response.data : error.message);
+      toast.error(`Error composing approval email: ${error.response ? error.response.data.error : error.message}`);
+    }
+  };
+
   if (!user) return <div>No user selected</div>;
 
   return (
@@ -255,7 +306,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
               <h2 className="text-xl font-semibold mb-4">Send 90% Email</h2>
               <input
                 type="text"
-                name="name"
+                name="Current_User_Name"
                 value={displayUser.Current_User_Name}
                 onChange={handleEmailInputChange}
                 placeholder="Name"
@@ -263,7 +314,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
               />
               <input
                 type="text"
-                name="cellNo"
+                name="Cell_no"
                 value={displayUser.Cell_no}
                 onChange={handleEmailInputChange}
                 placeholder="Cell Number"
@@ -271,7 +322,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
               />
               <input
                 type="text"
-                name="dataUsage"
+                name="DataUsage"
                 value={displayUser.DataUsage}
                 onChange={handleEmailInputChange}
                 placeholder="Data Usage"
@@ -279,7 +330,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
               />
               <input
                 type="email"
-                name="email"
+                name="Current_User_Email"
                 value={displayUser.Current_User_Email}
                 onChange={handleEmailInputChange}
                 placeholder="Email"
@@ -320,7 +371,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
               <h2 className="text-xl font-semibold mb-4">Send 100% Email</h2>
               <input
                 type="text"
-                name="name"
+                name="Current_User_Name"
                 value={displayUser.Current_User_Name}
                 onChange={handleEmailInputChange}
                 placeholder="Name"
@@ -328,7 +379,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
               />
               <input
                 type="text"
-                name="cellNo"
+                name="Cell_no"
                 value={displayUser.Cell_no}
                 onChange={handleEmailInputChange}
                 placeholder="Cell Number"
@@ -336,7 +387,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
               />
               <input
                 type="text"
-                name="dataUsage"
+                name="DataUsage"
                 value={displayUser.DataUsage}
                 onChange={handleEmailInputChange}
                 placeholder="Data Usage"
@@ -344,7 +395,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
               />
               <input
                 type="email"
-                name="email"
+                name="Current_User_Email"
                 value={displayUser.Current_User_Email}
                 onChange={handleEmailInputChange}
                 placeholder="Email"
@@ -378,7 +429,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
               <h2 className="text-xl font-semibold mb-4">Send Data Over Email</h2>
               <input
                 type="text"
-                name="name"
+                name="Current_User_Name"
                 value={displayUser.Current_User_Name}
                 onChange={handleEmailInputChange}
                 placeholder="Name"
@@ -386,7 +437,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
               />
               <input
                 type="text"
-                name="cellNo"
+                name="Cell_no"
                 value={displayUser.Cell_no}
                 onChange={handleEmailInputChange}
                 placeholder="Cell Number"
@@ -394,7 +445,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
               />
               <input
                 type="text"
-                name="dataUsage"
+                name="DataUsage"
                 value={displayUser.DataUsage}
                 onChange={handleEmailInputChange}
                 placeholder="Data Usage"
@@ -402,7 +453,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
               />
               <input
                 type="email"
-                name="email"
+                name="Current_User_Email"
                 value={displayUser.Current_User_Email}
                 onChange={handleEmailInputChange}
                 placeholder="Email"
@@ -427,7 +478,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
         )}
 
 
-        <button className='px-7 py-2 bg-glpl-red text-white font-medium hover:bg-red-800 transition-colors duration-300 ease-in-out'>
+        <button onClick={() => setIsApprovalModalOpen(true)} className='px-7 py-2 bg-glpl-red text-white font-medium hover:bg-red-800 transition-colors duration-300 ease-in-out'>
           Approval Email
         </button>
         <button onClick={onGoBack} className="px-7 py-2 bg-glpl-red text-white font-medium">
@@ -439,12 +490,12 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
       {/* Modal for Editing */}
       {isEditModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-md max-w-lg w-full">
+          <div className="bg-white p-6 rounded-md max-w-[800px] w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">Edit User Details</h2>
 
             <div className="grid grid-cols-2 gap-4 text-[14px]">
               <div>
-                <label><strong>Name:</strong></label>
+                <label className="block mb-1"><strong>Name:</strong></label>
                 <input
                   type="text"
                   name="Current_User_Name"
@@ -454,7 +505,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
                 />
               </div>
               <div>
-                <label><strong>Email:</strong></label>
+                <label className="block mb-1"><strong>Email:</strong></label>
                 <input
                   type="email"
                   name="Current_User_Email"
@@ -464,7 +515,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
                 />
               </div>
               <div>
-                <label><strong>Sim No:</strong></label>
+                <label className="block mb-1"><strong>Sim No:</strong></label>
                 <input
                   type="text"
                   name="SIM_No"
@@ -474,7 +525,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
                 />
               </div>
               <div>
-                <label><strong>Previous User:</strong></label>
+                <label className="block mb-1"><strong>Previous User:</strong></label>
                 <input
                   type="text"
                   name="Previous_User"
@@ -484,7 +535,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
                 />
               </div>
               <div>
-                <label><strong>Location:</strong></label>
+                <label className="block mb-1"><strong>Location:</strong></label>
                 <select
                   name="Location"
                   value={updatedUser.Location}
@@ -513,7 +564,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
                 </select>
               </div>
               <div>
-                <label><strong>Mode:</strong></label>
+                <label className="block mb-1"><strong>Mode:</strong></label>
                 <select
                   name="Mode"
                   value={updatedUser.Mode}
@@ -526,7 +577,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
                 </select>
               </div>
               <div>
-                <label><strong>GLPL Remark:</strong></label>
+                <label className="block mb-1"><strong>GLPL Remark:</strong></label>
                 <select
                   name="Remark"
                   value={updatedUser.Remark}
@@ -541,7 +592,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
                 </select>
               </div>
               <div>
-                <label><strong>Vi Status:</strong></label>
+                <label className="block mb-1"><strong>Vi Status:</strong></label>
                 <select
                   name="Vi_Status"
                   value={updatedUser.Vi_Status}
@@ -556,7 +607,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
                 </select>
               </div>
               <div>
-                <label><strong>Asset Mapping:</strong></label>
+                <label className="block mb-1"><strong>Asset Mapping:</strong></label>
                 <select
                   name="Asset_Mapping"
                   value={updatedUser.Asset_Mapping}
@@ -568,9 +619,8 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
                   <option value="Suspended">Pending</option>
                 </select>
               </div>
-
               <div>
-                <label><strong>Department :</strong></label>
+                <label className="block mb-1"><strong>Department:</strong></label>
                 <input
                   type="text"
                   name="Department"
@@ -580,7 +630,17 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
                 />
               </div>
               <div>
-                <label><strong>Reporting Manager :</strong></label>
+                <label className="block mb-1"><strong>Designation:</strong></label>
+                <input
+                  type="text"
+                  name="Designation"
+                  value={updatedUser.Designation || ''}
+                  onChange={handleInputChange}
+                  className="border p-2 w-full"
+                />
+              </div>
+              <div>
+                <label className="block mb-1"><strong>Reporting Manager:</strong></label>
                 <input
                   type="text"
                   name="Reporting_Manager"
@@ -590,7 +650,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
                 />
               </div>
               <div>
-                <label><strong>Manager Email :</strong></label>
+                <label className="block mb-1"><strong>Manager Email:</strong></label>
                 <input
                   type="text"
                   name="Manager_Email"
@@ -599,21 +659,92 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
                   className="border p-2 w-full"
                 />
               </div>
-
             </div>
 
-            <div className="flex justify-end mt-4">
-              <button onClick={handleUpdateClick} className="bg-glpl-red text-white px-4 py-2 rounded">
+            <div className="flex justify-end mt-6">
+              <button onClick={handleUpdateClick} className="bg-glpl-red text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">
                 Update
               </button>
-              <button onClick={() => setEditModalOpen(false)} className="bg-gray-300 text-black px-4 py-2 rounded ml-2">
+              <button onClick={() => setEditModalOpen(false)} className="bg-gray-300 text-black px-4 py-2 rounded ml-2 hover:bg-gray-400 transition-colors">
                 Cancel
               </button>
             </div>
           </div>
         </div>
       )}
-        <ToastContainer />
+
+      {/* Approval Email Modal */}
+      {isApprovalModalOpen && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50 ">
+          <div className="bg-white p-5 rounded-lg shadow-lg w-[800px]">
+            <h2 className="text-xl font-semibold mb-4">Send Approval Email</h2>
+            <input
+              type="text"
+              name="month"
+              value={approvalEmailData.month}
+              onChange={handleApprovalEmailInputChange}
+              placeholder="Month"
+              className="border border-gray-300 p-2 mb-2 w-full"
+            />
+            <input
+              type="text"
+              name="name"
+              value={displayUser.Current_User_Name}
+              onChange={handleApprovalEmailInputChange}
+              placeholder="Name"
+              className="border border-gray-300 p-2 mb-2 w-full"
+            />
+            <input
+              type="text"
+              name="reporting_manager"
+              value={displayUser.Reporting_Manager}
+              onChange={handleApprovalEmailInputChange}
+              placeholder="Reporting Manager"
+              className="border border-gray-300 p-2 mb-2 w-full"
+            />
+            <input
+              type="text"
+              name="planname"
+              value={displayUser.PlanName}
+              onChange={handleApprovalEmailInputChange}
+              placeholder="Plan Name"
+              className="border border-gray-300 p-2 mb-2 w-full"
+            />
+            <input
+              type="text"
+              name="base"
+              value={displayUser.Cost}
+              onChange={handleApprovalEmailInputChange}
+              placeholder="Base"
+              className="border border-gray-300 p-2 mb-2 w-full"
+            />
+            <input
+              type="text"
+              name="isd_minutes"
+              value={displayUser.isd_minutes}
+              onChange={handleApprovalEmailInputChange}
+              placeholder="ISD Minutes"
+              className="border border-gray-300 p-2 mb-4 w-full"
+            />
+            <div className="flex justify-end">
+              <button
+                className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-black rounded-md mr-2"
+                onClick={() => setIsApprovalModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-glpl-red hover:bg-red-800 text-white rounded-md"
+                onClick={handleApprovalEmailSubmit}
+              >
+                Send Email
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ToastContainer />
     </div>
   );
 };

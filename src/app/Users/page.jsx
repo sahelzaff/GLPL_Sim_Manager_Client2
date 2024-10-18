@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 import { AiOutlineSearch, AiOutlineClose } from 'react-icons/ai';
 import axios from 'axios';
@@ -10,6 +10,19 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useDebounce } from 'use-debounce';
 import loadingAnimation1 from '../../../public/assets/Animation_1728289722169.json';
 import loadingAnimation2 from '../../../public/assets/Animation_1728290862649.json';
+
+// Custom hook to scroll to top when component mounts or when shouldScrollToTop is true
+const useScrollToTop = (shouldScrollToTop, setShouldScrollToTop) => {
+  useEffect(() => {
+    if (shouldScrollToTop) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      setShouldScrollToTop(false);
+    }
+  }, [shouldScrollToTop, setShouldScrollToTop]);
+};
 
 const fetchUsers = async ({ queryKey }) => {
   const [_, page, searchTerm, searchParam, statusFilter] = queryKey;
@@ -30,6 +43,10 @@ const fetchUsers = async ({ queryKey }) => {
     throw error;
   }
 };
+
+
+  
+
 
 // LoadingAnimation component
 const LoadingAnimation = ({ animation, text }) => (
@@ -196,7 +213,7 @@ const DeleteConfirmationModal = ({ userToDelete, handleDeleteUser, setUserToDele
   )
 );
 
-const Home = ({ onUserClick, onAddUserClick }) => {
+const Home = ({ onUserClick, onAddUserClick, shouldScrollToTop, setShouldScrollToTop }) => {
   const [searchParam, setSearchParam] = useState('Name');
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
@@ -204,6 +221,9 @@ const Home = ({ onUserClick, onAddUserClick }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [userToDelete, setUserToDelete] = useState(null);
   const queryClient = useQueryClient();
+
+  // Use the custom hook to scroll to top when shouldScrollToTop is true
+  useScrollToTop(shouldScrollToTop, setShouldScrollToTop);
 
   const { data, error, isLoading, refetch } = useQuery(
     ['users', currentPage, debouncedSearchTerm, searchParam, statusFilter],

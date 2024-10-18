@@ -9,6 +9,7 @@ const MainLayout = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [activeMenu, setActiveMenu] = useState('Home');
   const [isAddingUser, setIsAddingUser] = useState(false);
+  const [shouldScrollToTop, setShouldScrollToTop] = useState(false);
 
   const handleUserClick = useCallback((user) => {
     console.log("Selected user in MainLayout:", user);
@@ -23,6 +24,7 @@ const MainLayout = () => {
   const handleGoBack = useCallback(() => {
     console.log("Going back to user list");
     setSelectedUser(null);
+    setShouldScrollToTop(true);
   }, []);
 
   useEffect(() => {
@@ -62,7 +64,12 @@ const MainLayout = () => {
               onUpdateUser={handleUpdateUser} 
             />
           ) : (
-            <Home onUserClick={handleUserClick} onAddUserClick={handleAddUserClick} />
+            <Home 
+              onUserClick={handleUserClick} 
+              onAddUserClick={handleAddUserClick} 
+              shouldScrollToTop={shouldScrollToTop}
+              setShouldScrollToTop={setShouldScrollToTop}
+            />
           )}
         </div>
       </div>

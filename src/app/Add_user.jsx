@@ -19,6 +19,7 @@ const initialUserState = {
   Department: '',
   Reporting_Manager: '',
   Manager_Email: '',
+  Designation: '', // Added Designation field
 };
 
 const Add_user = ({ onCancel }) => {

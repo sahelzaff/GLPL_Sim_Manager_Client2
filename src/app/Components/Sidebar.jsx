@@ -23,7 +23,7 @@ const Sidebar = ({ activeMenu, onMenuClick }) => {
   return (
     <aside className="fixed left-0 top-0 w-64 h-full bg-gray-800 text-white p-4 overflow-y-auto">
       <div className="flex flex-col items-center mb-4">
-        <Image src={assets.glpl_logo} width={100} height={100} alt="GLPL Logo" />
+        <Image src={`/${assets.glpl_logo}`} width={100} height={100} alt="GLPL Logo" />
         <h2 className="text-xl font-bold ml-2">GLPL Sim Manager</h2>
       </div>
       <ul>
