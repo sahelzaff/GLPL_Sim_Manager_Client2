@@ -80,7 +80,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
     }
 
     try {
-      const response = await axios.put(`http://localhost:5000/api/users/${user.Sr_no}`, updatedUser);
+      const response = await axios.put(`http://192.168.45.130:5021/api/users/${user.Sr_no}`, updatedUser);
       if (response.status === 200) {
         setEditModalOpen(false);
         setUser(response.data);
@@ -133,7 +133,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
 
     try {
       // Construct the request URL with query parameters
-      const requestUrl = `http://localhost:5000/api/email/${emailType}?to=${encodeURIComponent(Current_User_Email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const requestUrl = `http://192.168.45.130:5021/api/email/${emailType}?to=${encodeURIComponent(Current_User_Email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
       const response = await axios.get(requestUrl);
 
@@ -189,7 +189,7 @@ Kindly review and approve the bills at your earliest convenience.`;
 
     try {
       console.log('Sending approval email with data:', { to: user.Manager_Email, subject, body });
-      const response = await axios.get(`http://localhost:5000/api/email/approval`, {
+      const response = await axios.get(`http://192.168.45.130:5021/api/email/approval`, {
         params: {
           to: user.Manager_Email,
           subject,
