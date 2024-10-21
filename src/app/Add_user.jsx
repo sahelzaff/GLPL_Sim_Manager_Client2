@@ -33,7 +33,7 @@ const Add_user = ({ onCancel }) => {
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://192.168.45.130:5021/api/users', userDetails);
+      const response = await axios.post('http://192.168.45.129:5021/api/users', userDetails);
       if (response.status === 201) {
         toast.success('User added successfully!');
         setUserDetails(initialUserState);

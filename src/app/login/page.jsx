@@ -22,7 +22,7 @@ const Login = () => {
     setLoading(true); // Set loading state
 
     // Sending username and password to the API for authentication
-    const res = await fetch('http://192.168.45.130:5021/api/login', {
+    const res = await fetch('http://192.168.45.129:5021/api/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

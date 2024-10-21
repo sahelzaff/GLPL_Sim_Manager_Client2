@@ -80,7 +80,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
     }
 
     try {
-      const response = await axios.put(`http://192.168.45.130:5021/api/users/${user.Sr_no}`, updatedUser);
+      const response = await axios.put(`http://192.168.45.129:5021/api/users/${user.Sr_no}`, updatedUser);
       if (response.status === 200) {
         setEditModalOpen(false);
         setUser(response.data);
@@ -133,34 +133,20 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
 
     try {
       // Construct the request URL with query parameters
-      const requestUrl = `http://192.168.45.130:5021/api/email/${emailType}?to=${encodeURIComponent(Current_User_Email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const requestUrl = `http://localhost:5000/api/email/${emailType}?to=${encodeURIComponent(Current_User_Email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-      const response = await axios.get(requestUrl);
+      // Open the mailto link in a new tab
+      window.open(requestUrl, '_blank');
 
-      // Close the modal regardless of the response
+      // Close the modal
       setIsModalOpen(false);
       setAIsModalOpen(false);
       setOverIsModalOpen(false);
 
-      if (response.data && response.data.message) {
-        // If we have a success message from the server
-        toast.success(response.data.message);
-      } else {
-        // If we don't have a specific message, use a generic success message
-        toast.success('Email Composed Successfully');
-      }
-
-      console.log('Email composition response:', response.data);
+      toast.success('Email Composed Successfully');
     } catch (error) {
-      console.error('Error composing email:', error.response ? error.response.data : error.message);
-      
-      // Close the modal even if there's an error
-      setIsModalOpen(false);
-      setAIsModalOpen(false);
-      setOverIsModalOpen(false);
-
-      // Show an error toast, but with a more user-friendly message
-      toast.error('There was an issue composing the email, but it may have been created in Outlook. Please check your drafts.');
+      console.error('Error composing email:', error);
+      toast.error('There was an issue composing the email. Please try again.');
     }
   }, [displayUser]);
 
@@ -188,27 +174,16 @@ Please find attached the Vodafone mobile bills ${approvalEmailData.month} for ${
 Kindly review and approve the bills at your earliest convenience.`;
 
     try {
-      console.log('Sending approval email with data:', { to: user.Manager_Email, subject, body });
-      const response = await axios.get(`http://192.168.45.130:5021/api/email/approval`, {
-        params: {
-          to: user.Manager_Email,
-          subject,
-          body
-        }
-      });
+      const requestUrl = `http://localhost:5000/api/email/approval?to=${encodeURIComponent(user.Manager_Email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-      console.log('Approval email response:', response.data);
+      // Open the mailto link in a new tab
+      window.open(requestUrl, '_blank');
 
-      if (response.data && response.data.message) {
-        toast.success(response.data.message);
-      } else {
         toast.success('Approval Email Composed Successfully');
-      }
-
       setIsApprovalModalOpen(false);
     } catch (error) {
-      console.error('Error composing approval email:', error.response ? error.response.data : error.message);
-      toast.error(`Error composing approval email: ${error.response ? error.response.data.error : error.message}`);
+      console.error('Error composing approval email:', error);
+      toast.error('Error composing approval email');
     }
   };
 

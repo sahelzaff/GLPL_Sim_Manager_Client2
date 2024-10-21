@@ -27,7 +27,7 @@ const useScrollToTop = (shouldScrollToTop, setShouldScrollToTop) => {
 const fetchUsers = async ({ queryKey }) => {
   const [_, page, searchTerm, searchParam, statusFilter] = queryKey;
   try {
-    const response = await axios.get('http://192.168.45.130:5021/api/users', {
+    const response = await axios.get('http://192.168.45.129:5021/api/users', {
       params: { 
         page, 
         searchTerm, 
@@ -241,7 +241,7 @@ const Home = ({ onUserClick, onAddUserClick, shouldScrollToTop, setShouldScrollT
 
   const handleDeleteUser = useCallback(async (userId) => {
     try {
-      await axios.delete(`http://192.168.45.130:5021/api/users/${userId}`);
+      await axios.delete(`http://192.168.45.129:5021/api/users/${userId}`);
       queryClient.invalidateQueries('users');
       setUserToDelete(null);
       toast.success('User deleted successfully');
