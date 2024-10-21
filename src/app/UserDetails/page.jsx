@@ -174,7 +174,7 @@ Please find attached the Vodafone mobile bills ${approvalEmailData.month} for ${
 Kindly review and approve the bills at your earliest convenience.`;
 
     try {
-      const requestUrl = `http://localhost:5000/api/email/approval?to=${encodeURIComponent(user.Manager_Email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const requestUrl = `http://192.168.45.129:5021/api/email/approval?to=${encodeURIComponent(user.Manager_Email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
       // Open the mailto link in a new tab
       window.open(requestUrl, '_blank');
