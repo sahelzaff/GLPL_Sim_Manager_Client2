@@ -133,7 +133,7 @@ const UserDetails = ({ user: initialUser, onGoBack, onUpdateUser }) => {
 
     try {
       // Construct the request URL with query parameters
-      const requestUrl = `http://localhost:5000/api/email/${emailType}?to=${encodeURIComponent(Current_User_Email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      const requestUrl = `http://192.168.45.129:5021/api/email/${emailType}?to=${encodeURIComponent(Current_User_Email)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
       // Open the mailto link in a new tab
       window.open(requestUrl, '_blank');
