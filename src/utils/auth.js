@@ -3,7 +3,7 @@ export const isAuthenticated = async () => {
     const token = localStorage.getItem('authToken');
     if (!token) return false;
 
-    const response = await fetch('http://localhost:5000/api/verify-token', {
+    const response = await fetch('http://192.168.45.129:5021/api/verify-token', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

@@ -179,7 +179,7 @@ Kindly review and approve the bills at your earliest convenience.`;
       // Open the mailto link in a new tab
       window.open(requestUrl, '_blank');
 
-        toast.success('Approval Email Composed Successfully');
+      toast.success('Approval Email Composed Successfully');
       setIsApprovalModalOpen(false);
     } catch (error) {
       console.error('Error composing approval email:', error);
